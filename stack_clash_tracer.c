@@ -5,10 +5,10 @@
 QBDIPRELOAD_INIT;
 
 const long PAGE_SIZE = 4096;
-static bool verbose= false;
+static bool verbose= true;
 static FILE* logstream = NULL;
 
-/* This is run after every instruction. It just checks if the stack pointer haw
+/* This is run after every instruction. It just checks if the stack pointer has
  * grown, if the instruction touches the stack, and if so reports accordingly.
  */
 static VMAction onInstruction(VMInstanceRef vm, GPRState *gprState, FPRState *fprState, void *data) {
@@ -62,7 +62,7 @@ int qbdipreload_on_premain(void *gprCtx, void *fpuCtx) {
 
 
 int qbdipreload_on_main(int argc, char** argv) {
-    qbdi_addLogFilter("*", QBDI_DEBUG);
+    qbdi_setLogPriority(QBDI_DEBUG);
     return QBDIPRELOAD_NOT_HANDLED;
 }
 
@@ -77,7 +77,7 @@ int qbdipreload_on_run(VMInstanceRef vm, rword start, rword stop) {
     else
       logstream = stderr;
     qbdi_recordMemoryAccess(vm, QBDI_MEMORY_READ_WRITE);
-    qbdi_addCodeCB(vm, QBDI_POSTINST, onInstruction, NULL);
+    qbdi_addCodeCB(vm, QBDI_POSTINST, onInstruction, NULL, 1);
     qbdi_run(vm, start, stop);
     return QBDIPRELOAD_NO_ERROR;
 }
